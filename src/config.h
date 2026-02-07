@@ -1,15 +1,25 @@
 #pragma once
 
-// TODO make this configurable from a config file
+#include <string>
+#include <map>
+#include <cinttypes>
 
-#include <termios.h>
+class Config {
+public:
+	Config(const std::string &file);
 
-namespace config {
+	/* Use keys from confkeys here */
+	bool exists(const std::string &key) const;
+	const std::string &getString(const std::string &key) const;
+	unsigned getInt(const std::string &key) const;
+	float getFloat(const std::string &key) const;
 
-static const char RADIO_PORT[]      = "/dev/ttyFTCAT";
-static const speed_t RADIO_BAUD     = B38400;
-static const char SYMLINK_PATH[]    = "/tmp/ttyCATProxy";
-static const unsigned CAT_TIMEOUT   = 5000; /* ms */
-static const unsigned POLL_INTERVAL = 250;  /* ms */
+	/* Special getter for hex-encoded color */
+	uint32_t getColor(const std::string &key) const;
 
-} // namespace config
+private:
+	std::map<std::string, std::string> data;
+
+	friend int configHandler(void *user, const char *section, const char *name, const char *value);
+	void add(const std::string &key, const std::string &value);
+};

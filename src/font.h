@@ -5,12 +5,12 @@
 
 namespace font {
 
-static const size_t UNSCALED_CHAR_WIDTH  = 9;
-static const size_t UNSCALED_CHAR_HEIGHT = 16;
-static const size_t FONT_SCALE           = 1;
-static const size_t SCALED_CHAR_WIDTH    = UNSCALED_CHAR_WIDTH * FONT_SCALE;
-static const size_t SCALED_CHAR_HEIGHT   = UNSCALED_CHAR_HEIGHT * FONT_SCALE;
+static const unsigned WIDTH  = 9;
+static const unsigned HEIGHT = 16;
 
-void getLine(bool line[SCALED_CHAR_WIDTH], char ch, size_t lineNo);
+/* Line is WIDTH * scale bools long
+ * lineNo is 0 to HEIGHT * scale - 1
+ */
+void getLine(unsigned scale, bool *line, char ch, unsigned lineNo);
 
 } // namespace font

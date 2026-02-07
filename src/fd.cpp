@@ -10,6 +10,11 @@ Fd::~Fd()
 
 void Fd::setFd(int fd_, bool noclose_)
 {
+	reset(fd_, noclose_);
+}
+
+void Fd::reset(int fd_, bool noclose_)
+{
 	if(!noclose && fd >= 0) {
 		close(fd);
 	}

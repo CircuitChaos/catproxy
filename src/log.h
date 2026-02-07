@@ -1,17 +1,9 @@
 #pragma once
 
-#include <cstdio>
+#include <string>
 
-// TODO make this configurable + toggle debug with USR1/USR2
+void loggerLog(bool debug, const char *file, int line, const char *fmt, ...) __attribute__((format(printf, 4, 5)));
+void loggerSetDebug(bool debug);
 
-/* Very simple logging for now */
-#define logx(...)                                       \
-	do {                                                \
-		fprintf(stderr, "%s:%d: ", __FILE__, __LINE__); \
-		fprintf(stderr, __VA_ARGS__);                   \
-		fprintf(stderr, "\n");                          \
-	} while(0)
-
-#define logn(...) logx(__VA_ARGS__)
-#define logd(...) (void) 0
-// #define logd(...) logx(__VA_ARGS__)
+#define logn(...) loggerLog(false, __FILE__, __LINE__, __VA_ARGS__)
+#define logd(...) loggerLog(true, __FILE__, __LINE__, __VA_ARGS__)

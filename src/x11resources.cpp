@@ -1,6 +1,6 @@
-#include "uiresources.h"
+#include "x11resources.h"
 
-UiResources::~UiResources()
+X11Resources::~X11Resources()
 {
 	if(image) {
 		/* Fress also pixels */

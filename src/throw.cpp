@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include <cstdio>
 #include "throw.h"
+#include "log.h"
 
 void doThrow(const char *file, int line, const char *fmt, ...)
 {
@@ -22,5 +23,6 @@ void doThrow(const char *file, int line, const char *fmt, ...)
 	std::string s(std::string(buf) + p);
 	free(p);
 
+	logn("%s", s.c_str());
 	throw std::runtime_error(s);
 }

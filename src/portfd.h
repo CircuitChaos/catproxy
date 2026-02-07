@@ -4,8 +4,11 @@
 #include <string>
 #include "fd.h"
 
-class PortFd: public Fd {
+class PortFd : public Fd {
 public:
-	PortFd(const std::string &path, speed_t speed);
+	PortFd(const std::string &path, unsigned baud);
 	virtual ~PortFd();
+
+private:
+	static speed_t baudToSpeed(unsigned baud);
 };

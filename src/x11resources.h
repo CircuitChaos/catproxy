@@ -5,8 +5,8 @@
 #include <optional>
 #include <cstdint>
 
-struct UiResources {
-	~UiResources();
+struct X11Resources {
+	~X11Resources();
 
 	Display *dpy{nullptr};
 	XVisualInfo vi;

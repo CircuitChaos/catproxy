@@ -1,0 +1,141 @@
+; === CAT Proxy configuration file ===
+;
+; This is the sample configuration file for CAT Proxy. Note that not every 
+; configuration key has to be set (present and assigned value) -- for 
+; example you don't have to configure X colors if you're not using X -- 
+; but there are no defaults in the program, so if the setting is absent, 
+; but is needed, a runtime error will occur.
+
+; Radio port is the serial port of the radio. CAT Proxy connects to it and 
+; passes commands from your program of choice (like WSJT-X) and its own 
+; queries. Typically it will be something like /dev/ttyUSB0 (for 
+; USB-connected radios).
+;
+; In my case it's /dev/ttyFTCAT, because of these two beautiful udev rules 
+; that I recommend for FT-891:
+;
+; ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea70", ENV{ID_USB_INTERFACE_NUM}=="00", SUBSYSTEM=="tty", SYMLINK+="ttyFTCAT"
+; ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea70", ENV{ID_USB_INTERFACE_NUM}=="01", SUBSYSTEM=="tty", SYMLINK+="ttyFTPTT"
+port.device = /dev/ttyFTCAT
+
+; Serial communication has to have certain parameters, like baud rate, 
+; etc. matched between the program (CAT Proxy) and your radio. This is the 
+; baudrate of your radio.
+;
+; Other parameters (start bits, data bits, parity, flow control) are 
+; hardcoded to 8n1, without flow control. Please let me know if you need 
+; these to be configurable.
+port.baudrate = 38400
+
+; If you're using CAT Proxy as intended, you'll want to connect some other 
+; program to it, like WSJT-X. As these programs typically talk only to 
+; serial ports, CAT Proxy emulates a serial port using a pseudoterminal 
+; (more information: man ptmx).
+;
+; If a pseudoterminal device is created, it's assigned the first free 
+; number from the /dev/pts directory. Because this number might be 
+; different every time you run the program, CAT Proxy will create a 
+; symlink to the device it created. You should point your program to that 
+; symlink.
+;
+; For example, if the symlink is ~/.catproxy.tty, you should configure 
+; your CAT port in WSJT-X (or other program) as /home/user/.catproxy.tty. 
+; Tilde (~) is replaced by CAT Proxy with user's home directory.
+;
+; If you don't want this functionality then don't use it, but it can't 
+; be disabled in the current version.
+pty.symlink = ~/.catproxy.tty
+
+; This is the polling interval. Every once in a while, CAT Proxy will 
+; pause proxying data between your program and your radio and inject its 
+; own queries to read meters. This setting determines how often, in 
+; milliseconds, it happens. 250 milliseconds seems to be a reasonable 
+; choice.
+cat.poll_interval = 250
+
+; This is the CAT timeout. Once request is sent, your radio has certain 
+; amount of time to reply. If it fails to do it in that time frame, meters 
+; are not read.
+;
+; Note that even after the timeout CAT Proxy will reattempt to read meters 
+; after poll_interval elapses. It's done to allow you to turn off your 
+; radio without turning off CAT Proxy. As long as the serial port is 
+; available (it is, in case of FT-891, even if the radio is turned off), 
+; CAT Proxy will resume normal operation once radio is turned back on.
+;
+; Default value is 1 second (1000 milliseconds) and it's probably too 
+; much, but it doesn't hurt.
+cat.timeout = 1000
+
+; Different radios use different flavors of CAT protocol, have different scaling 
+; for meter values, etc. Here you can specify your radio model. It has to be 
+; supported by the program.
+;
+; Right now, only FT-891 is supported. If the program becomes popular and 
+; there are volunteers to provide information and help testing, maybe 
+; other radios will be added as well.
+;
+; List of radios supported by the program, and their meters, can be 
+; obtained by using command line argument: -l
+meters.radio_model = FT-891
+
+; Once meters are read, the program has to sent their values somewhere. A 
+; method to present this data is called "output" here. Right now, only two 
+; outputs are supported: X11-based (called x11) and, as a fallback, simple 
+; logging to stdout (called table). Other outputs might be added in the 
+; future, if there's a need (for example not display meters on a fancy 
+; display, connected to GPIO lines of your Raspberry?).
+;
+; You can show supported outputs with -l.
+;
+; This setting allows you to specify the output.
+output.type = x11
+
+; Configuration for X11 output follows. First, you can configure font 
+; scaling. It has to be integer, and minimum value is 1. There's no 
+; maximum imposed on you, but the larger the font, the worse it will 
+; look. Use your judgment.
+;
+; Each character is 9x16 pixels. Scale set to 1 means a character will be 
+; 9x16 pixels, for 2 it will be 18x32 pixels, and so on.
+;
+; Unless you have very poor eyesight or a very high-resolution display, 
+; I recommend keeping it at 1 (but 2 also doesn't look bad).
+output.x11.scale = 1
+
+; On the X11 output, meters are displayed using different colors. Meters 
+; that are unavailable at the moment (for example SWR when RX-ing, or 
+; signal level when TX-ing) are greyed out, but they don't have to be. 
+; Here are the colors for the window and each meter. Note that meter names 
+; have to match meter names for the configured radio model (again, 
+; catproxy -l), in lowercase.
+;
+; Colors are given as 6-digit hexadecimal RGB numbers, where each octet is 
+; from 00 (darkest) to ff (brightest). So 000000 is black, ff0000 is red, 
+; and so on. It's the same scheme as in HTML.
+output.x11.color.background = 101010
+output.x11.color.disabled_meter = 404040
+output.x11.color.meter.alc = 00ff00
+output.x11.color.meter.cmp = 00ff00
+output.x11.color.meter.sig = 00ff00
+output.x11.color.meter.pwr = ffff00
+output.x11.color.meter.idd = ffff00
+
+; SWR meter is different, as it's the key meter, in my opinion. Three 
+; ranges are possible for this meter, and it will change the color if the 
+; range is exceeded. It's not smoothed -- the color will change rapidly.
+output.x11.color.meter.swr.low = 00ff00
+output.x11.color.meter.swr.medium = ffff00
+output.x11.color.meter.swr.high = ff0000
+
+; Thresholds for the SWR meter are below. If SWR is >= threshold, a color 
+; will be applied.
+output.x11.color.meter.swr.thres_medium = 1.5
+output.x11.color.meter.swr.thres_high = 2.0
+
+; Each meter has a bar. Normally it starts grey, turns blue, and 
+; then turns white, so there are two ranges here (it's hardcoded for now). 
+; Play with these settings to alter bar colors.
+output.x11.color.bar.minimum = 404000
+output.x11.color.bar.medium = 4040ff
+output.x11.color.bar.maximum = ffffff

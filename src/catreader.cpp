@@ -1,9 +1,12 @@
 #include "catreader.h"
+#include "throw.h"
+
+static const size_t MAX_CAT_SIZE = 256; /* More than enough */
 
 std::optional<std::string> CatReader::feed(uint8_t byte)
 {
-	// TODO add some limit on the size
 	command += byte;
+	xassert(command.size() < MAX_CAT_SIZE, "Maximum CAT command size exceeded");
 
 	if(byte == ';') {
 		const std::string cpy(command);
