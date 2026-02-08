@@ -10,4 +10,5 @@ public:
 
 private:
 	std::string command;
+	bool overflow{false};
 };
