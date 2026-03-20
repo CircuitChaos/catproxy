@@ -127,6 +127,7 @@ The program is in its very early stage, not even alpha, so bugs are to be expect
 * Add the ability to filter CAT commands (for example if the program stubbornly attempts to change some setting in the radio you don't want it to touch). If you need this, you can always do a quick hack – see `Proxy::feedFromPty` in `proxy.cpp`
 * When testing CAT Proxy without the external program connected, I noticed that responses from the radio forwarded to the program are sometimes echoed back by the PTY. I didn't spend too much time on this, but it might be worth investigating
 * Maybe beautify the X11 output somewhat. It's colorful, but otherwise crude. I'll need a visual artist for that…
+* Grey out all meters in case of CAT timeout
 
 ## Contact
 
