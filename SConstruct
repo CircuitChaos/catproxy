@@ -1,5 +1,5 @@
 env = Environment()
-env['CCFLAGS']	= '-Wall -Wextra -std=c++17 -O2 -pipe -g'
+env['CCFLAGS']	= '-Wall -Wextra -std=c++17 -O2 -pipe -g -Wno-psabi'
 env['CPPPATH']	= 'src'
 env['LIBS'] = ['X11', 'inih']
 
