@@ -69,7 +69,7 @@ void Cli::help()
 	    "  -h: show help (this screen)\n"
 	    "  -c <config_file>: specify alternate config file\n"
 	    "\n"
-	    "Default config file is ~/catproxy.conf.\n";
+	    "Default config file is ~/.catproxy.conf.\n";
 
 	printf("%s", usage);
 }
