@@ -2,14 +2,16 @@
 #include "throw.h"
 #include "log.h"
 #include "confkeys.h"
+#include "util.h"
 
-Proxy::Proxy(const Config &conf, Model &model, std::vector<uint8_t> &portSendq, std::vector<uint8_t> &ptySendq, TimerFd &timer)
+Proxy::Proxy(const Config &conf, Model &model, std::vector<uint8_t> &portSendq, std::vector<uint8_t> &ptySendq, TimerFd &timer, Broadcaster *bcast)
     : model(model),
       pollInterval(conf.getInt(config::CAT_POLL_INTERVAL)),
       catTimeout(conf.getInt(config::CAT_TIMEOUT)),
       portSendq(portSendq),
       ptySendq(ptySendq),
-      timer(timer)
+      timer(timer),
+      bcast(bcast)
 {
 	timer.start(pollInterval);
 }
@@ -61,6 +63,21 @@ void Proxy::feedFromPty(std::vector<uint8_t> &ptyRecvq)
 	for(std::vector<std::string>::const_iterator i = commands.begin(); i != commands.end(); ++i) {
 		logd("Forwarding command %s from program to the radio", i->c_str());
 		std::copy(i->begin(), i->end(), std::back_inserter(portSendq));
+
+		if(bcast) {
+			const unsigned freq = model.decodeFreq(*i);
+			if(freq != 0) {
+				BroadcastPacket p("freq_rsp");
+				p.add("cat_rsp", *i);
+				p.add("freq", util::format("%u", freq));
+				bcast->sendPacket(p);
+			}
+			else {
+				BroadcastPacket p("cat_rsp");
+				p.add("cat_rsp", *i);
+				bcast->sendPacket(p);
+			}
+		}
 	}
 }
 

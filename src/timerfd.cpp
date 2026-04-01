@@ -11,7 +11,7 @@
  * - EOF: terminate thread
  */
 
-static void threadFunc(SocketPair *sp, volatile uint32_t *interval)
+static void threadFunc(SocketPair *sp, std::atomic<uint32_t> *interval)
 {
 	useconds_t usecNeeded(0);
 	bool timerEnabled(false);

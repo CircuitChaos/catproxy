@@ -1,3 +1,4 @@
+#include <cstdlib>
 #include "x11resources.h"
 
 X11Resources::~X11Resources()
@@ -5,6 +6,12 @@ X11Resources::~X11Resources()
 	if(image) {
 		/* Fress also pixels */
 		XDestroyImage(image);
+	}
+	else {
+		/* In rare case, pixels might be already allocated */
+		if(pixels) {
+			free(pixels);
+		}
 	}
 
 	if(sizeHints) {

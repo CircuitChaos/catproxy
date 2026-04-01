@@ -167,8 +167,10 @@ bool ModelFT891::parseResponse(const std::string &rsp, unsigned &meter, uint8_t 
 		return false;
 	}
 
+	const long rawLong = strtol(rsp.substr(3, 3).c_str(), nullptr, 10);
+	xassert(rawLong >= 0 && rawLong <= 0xff, "Meter value out of allowed range");
 	meter = rsp[2] - '0';
-	raw   = strtol(rsp.substr(3, 3).c_str(), nullptr, 10);
+	raw   = rawLong;
 	logd("Response is for meter %u, raw value is %u", meter, raw);
 	return true;
 }
@@ -347,4 +349,13 @@ std::string ModelFT891::cookIdd(uint8_t raw)
 	};
 
 	return util::format("%.1f A", interpolate(raw, cal).first);
+}
+
+uint32_t ModelFT891::decodeFreq(const std::string &rsp)
+{
+	if(rsp.size() != 12 || rsp.substr(0, 2) != "FA" || rsp[11] != ';') {
+		return 0;
+	}
+
+	return strtoul(rsp.substr(2, 9).c_str(), nullptr, 10);
 }

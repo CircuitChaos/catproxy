@@ -2,10 +2,11 @@
 
 #include <thread>
 #include <cinttypes>
+#include <atomic>
 #include "socketpair.h"
 #include "fd.h"
 
-class TimerFd: public Fd {
+class TimerFd : public Fd {
 public:
 	TimerFd(uint32_t interval_ = 0);
 	virtual ~TimerFd();
@@ -18,7 +19,7 @@ public:
 
 private:
 	SocketPair sp;
-	volatile uint32_t interval;
+	std::atomic<uint32_t> interval;
 	std::thread thread;
 
 	void sendCommand(uint8_t cmd);

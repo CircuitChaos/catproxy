@@ -67,6 +67,20 @@ cat.poll_interval = 250
 ; much, but it doesn't hurt.
 cat.timeout = 1000
 
+; CAT Proxy can broadcast all CAT responses, decoded frequency responses, and 
+; all meter readings, on a UDP port. This is to be used by other applications 
+; to know the state of the radio (for example automatic antenna tuner). If 
+; specified, then both host and port have to be specified. Host will probably 
+; almost always be localhost's broadcast address (127.255.255.255), and default 
+; port is 5543.
+;
+; Note that this is broadcast in my own standard that is undocumented (yet). 
+; See broadcaster.cpp for details.
+;
+; It's disabled by default (commented out).
+;bcast.host = 127.255.255.255
+;bcast.port = 5543
+
 ; Different radios use different flavors of CAT protocol, have different scaling 
 ; for meter values, etc. Here you can specify your radio model. It has to be 
 ; supported by the program.

@@ -10,6 +10,7 @@ public:
 	virtual std::string start();
 	virtual std::optional<std::string> handleResponse(const std::string &rsp);
 	virtual Meters getMeters();
+	virtual uint32_t decodeFreq(const std::string &rsp);
 
 	static std::string getName();
 	static ModelMeterList getMeterList();

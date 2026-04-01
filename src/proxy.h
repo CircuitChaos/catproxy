@@ -9,10 +9,11 @@
 #include "catreader.h"
 #include "config.h"
 #include "model.h"
+#include "broadcaster.h"
 
 class Proxy {
 public:
-	Proxy(const Config &conf, Model &model, std::vector<uint8_t> &portSendq, std::vector<uint8_t> &ptySendq, TimerFd &timer);
+	Proxy(const Config &conf, Model &model, std::vector<uint8_t> &portSendq, std::vector<uint8_t> &ptySendq, TimerFd &timer, Broadcaster *bcast);
 
 	/* Current implementation consumes all data from vectors, but it's not a given */
 	void feedFromPort(std::vector<uint8_t> &portRecvq);
@@ -26,6 +27,7 @@ private:
 	std::vector<uint8_t> &portSendq;
 	std::vector<uint8_t> &ptySendq;
 	TimerFd &timer;
+	Broadcaster *const bcast;
 
 	/* If it's false, then timer is POLL_INTERVAL and we're proxying.
 	 * If it's true, then timer is CAT_TIMEOUT and we're reading meters.

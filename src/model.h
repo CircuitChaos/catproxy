@@ -42,6 +42,11 @@ public:
 	 * Empty vector means an error.
 	 */
 	virtual Meters getMeters() = 0;
+
+	/* Used for translating frequency, if it was read by the proxy and should be
+	 * broadcasted. Return 0 if this is not a frequency response.
+	 */
+	virtual uint32_t decodeFreq(const std::string &rsp) = 0;
 };
 
 typedef std::set<std::string> ModelMeterList;

@@ -6,7 +6,7 @@ std::pair<double, std::string> interpolate(uint8_t raw, const std::vector<Interp
 	xassert(raw >= cal[0].raw && raw <= cal[cal.size() - 1].raw, "Meter value out of range");
 
 	std::vector<InterpolatorEntry>::const_iterator prev(cal.begin());
-	std::vector<InterpolatorEntry>::const_iterator next;
+	std::vector<InterpolatorEntry>::const_iterator next(cal.end());
 	for(std::vector<InterpolatorEntry>::const_iterator i(cal.begin()); i != cal.end(); ++i) {
 		if(i->raw == raw) {
 			return std::pair<double, std::string>(i->numeric, i->textual);
@@ -19,6 +19,8 @@ std::pair<double, std::string> interpolate(uint8_t raw, const std::vector<Interp
 
 		prev = i;
 	}
+
+	xassert(next != cal.end(), "next is not set -- calibration table is malformed?");
 
 	const uint8_t minRaw(prev->raw);
 	const uint8_t maxRaw(next->raw);

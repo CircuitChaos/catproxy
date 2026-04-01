@@ -1,4 +1,5 @@
 #include <ini.h> // libinih: https://github.com/benhoyt/inih
+#include <climits>
 #include "throw.h"
 #include "config.h"
 
@@ -44,6 +45,7 @@ unsigned Config::getInt(const std::string &key) const
 	const std::string v = getString(key);
 	const long l        = strtol(v.c_str(), nullptr, 10);
 	xassert(l >= 0, "Negative value for key %s not supported", key.c_str());
+	xassert((unsigned long) l <= UINT_MAX, "Value for key %s is too large", key.c_str());
 	return l;
 }
 

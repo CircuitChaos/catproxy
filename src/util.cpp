@@ -26,9 +26,10 @@ std::string util::applyUserHome(const std::string &path)
 	const char *home = getenv("HOME");
 	xassert(home && *home, "Could not find user's home directory");
 
+	/* TODO this could be done more efficiently, revisit */
 	std::string out;
 	for(std::string::const_iterator i = path.begin(); i != path.end(); ++i) {
-		if(*i == '~') {
+		if(i == path.begin() && *i == '~') {
 			out += home;
 		}
 		else {

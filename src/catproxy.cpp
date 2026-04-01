@@ -22,8 +22,9 @@
 #include "util.h"
 #include "model.h"
 #include "output.h"
+#include "broadcaster.h"
 
-static const size_t MAX_QUEUE_SIZE = 8192; /* More than enough */
+static const size_t MAX_QUEUE_SIZE      = 8192; /* More than enough */
 static const char DEFAULT_CONFIG_FILE[] = "~/.catproxy.conf";
 
 /* Appends data read from fd to buf */
@@ -70,6 +71,28 @@ static void writeVect(int fd, std::vector<uint8_t> &buf)
 
 	buf.erase(buf.begin(), buf.begin() + rs);
 	logd("Written %zu bytes to fd %d, %zu bytes still waiting in sendq", (size_t) rs, fd, buf.size());
+}
+
+static void broadcastMeters(Broadcaster *bcast, const Meters &meters)
+{
+	if(!bcast) {
+		return;
+	}
+
+	BroadcastPacket p("meters");
+	unsigned count = 0;
+	for(Meters::const_iterator i = meters.begin(); i != meters.end(); ++i) {
+		const std::string prefix = util::format("meter_%u_", count++);
+		p.add(prefix + "available", i->available ? "yes" : "no");
+		p.add(prefix + "is_swr", i->isSwr ? "yes" : "no");
+		p.add(prefix + "name", i->name);
+		if(i->available) {
+			p.add(prefix + "raw", util::format("%u", i->raw));
+			p.add(prefix + "cooked", i->cooked);
+		}
+	}
+	p.add("count", util::format("%u", count));
+	bcast->sendPacket(p);
 }
 
 static void Main(int argc, char *const argv[])
@@ -125,12 +148,17 @@ static void Main(int argc, char *const argv[])
 	std::unique_ptr<Output> output(createOutput(conf.getString(config::OUTPUT_TYPE), conf, model->getMeterCount(), model->getMaxCookedSize()));
 	xassert(output, "Unsupported output type %s", conf.getString(config::OUTPUT_TYPE).c_str());
 
+	std::unique_ptr<Broadcaster> bcast = nullptr;
+	if(conf.exists(config::BCAST_HOST) && conf.exists(config::BCAST_PORT)) {
+		bcast.reset(new Broadcaster(conf.getString(config::BCAST_HOST), conf.getString(config::BCAST_PORT)));
+	}
+
 	std::vector<uint8_t> portSendq;
 	std::vector<uint8_t> portRecvq;
 	std::vector<uint8_t> ptySendq;
 	std::vector<uint8_t> ptyRecvq;
 
-	Proxy proxy(conf, *model, portSendq, ptySendq, timer);
+	Proxy proxy(conf, *model, portSendq, ptySendq, timer, bcast.get());
 
 	/* This is just to help */
 	static const size_t portIdx  = 0;
@@ -159,7 +187,7 @@ static void Main(int argc, char *const argv[])
 		outputfd.fd     = output->getFd();
 		outputfd.events = POLLIN;
 		fds.push_back(outputfd);
-		outputIdx = 4;
+		outputIdx = fds.size() - 1;
 	}
 
 	for(;;) {
@@ -248,6 +276,7 @@ static void Main(int argc, char *const argv[])
 		const Meters meters = model->getMeters();
 		if(!meters.empty()) {
 			output->update(meters);
+			broadcastMeters(bcast.get(), meters);
 		}
 
 		if(outputIdx >= 0 && (fds[outputIdx].revents & POLLIN) && !output->read()) {
